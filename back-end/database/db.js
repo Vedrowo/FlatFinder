@@ -127,15 +127,6 @@ dataPool.removeApartment = (apartment_id) => {
     })
 }
 
-dataPool.getApartment = (apartment_id) => {
-    return new Promise((resolve, reject) => {
-        conn.query('SELECT * FROM Apartment WHERE apartment_id = ?', [apartment_id], (err, res) => {
-            if (err) { return reject(err) }
-            return resolve(res)
-        })
-    })
-}
-
 dataPool.getApartmentsFromLandlord = (user_id) => {
     return new Promise((resolve, reject) => {
         conn.query('SELECT * FROM Apartment WHERE user_id = ?', [user_id], (err, res) => {
@@ -145,23 +136,36 @@ dataPool.getApartmentsFromLandlord = (user_id) => {
     })
 }
 
-dataPool.getApartmentsWithinPriceRange = (startPrice, endPrice) => {
+dataPool.getApartments = (startPrice, endPrice, location) => {
     return new Promise((resolve, reject) => {
-        conn.query('SELECT * FROM Apartment WHERE price BETWEEN ? AND ?', [startPrice, endPrice], (err, res) => {
+        let sql = 'SELECT * FROM Apartment WHERE 1=1'
+        const params = []
+
+        if (startPrice !== undefined && endPrice !== undefined) {
+            sql += ' AND price BETWEEN ? AND ?'
+            params.push(startPrice, endPrice)
+        }
+
+        if (location) {
+            sql += ' AND LOWER(location) LIKE LOWER(?)'
+            params.push(`%${location}%`)
+        }
+
+        conn.query(sql, params, (err, res) => {
+            if (err) return reject(err)
+            resolve(res)
+        })
+    })
+}
+
+dataPool.getApartment = (apartment_id) => {
+    return new Promise((resolve, reject) => {
+        conn.query('SELECT * FROM Apartment WHERE apartment_id = ?', [apartment_id], (err, res) => {
             if (err) { return reject(err) }
             return resolve(res)
         })
     })
 }
-
-dataPool.allApartments = () => {
-    return new Promise((resolve, reject) => {
-        conn.query('SELECT * FROM Apartment', (err, res) => {
-            if (err) { return reject(err) }
-            return resolve(res)
-        })
-    })
-};
 
 dataPool.addStudentListing = (user_id, location_preference, price_range, description, move_in_date) => {
     return new Promise((resolve, reject) => {
