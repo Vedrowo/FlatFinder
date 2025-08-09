@@ -4,7 +4,7 @@ const db = require('../database/db.js')
 
 apartments.get('/', async (req, res, next) => {
     try{
-        var queryResult = await db.allApartments();
+        var queryResult = await db.getApartments();
         res.json(queryResult)
     }
     catch(err){

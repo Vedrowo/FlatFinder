@@ -1,0 +1,73 @@
+.startpage-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+p {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.error {
+  color: #c0392b;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.apartment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.apartment-card {
+  border: 1px solid #ddd;
+  padding: 15px 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apartment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.apartment-card h3 {
+  margin-top: 0;
+  color: #2980b9;
+}
+
+.apartment-card p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.apartment-card button {
+  margin-top: 10px;
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.apartment-card button:hover {
+  background-color: #1c5980;
+}

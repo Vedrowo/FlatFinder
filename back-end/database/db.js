@@ -23,7 +23,7 @@ conn.connect((err) => {
 
 let dataPool = {}
 
-dataPool.registerUser = async (email, password, name, phoneNum, role, otherData) => {
+dataPool.registerUser = async (email, password, name, phone_number, role) => {
     const emailExists = await dataPool.checkEmailExists(email)
 
     if (emailExists) {
@@ -33,11 +33,11 @@ dataPool.registerUser = async (email, password, name, phoneNum, role, otherData)
     const encryptedPassword = await hashPassword(password)
 
     return new Promise((resolve, reject) => {
-        conn.query(`INSERT INTO User (email , password, name, phone_number) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phoneNum], (err, res) => {
+        conn.query(`INSERT INTO User (email , password, name, phone_number) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phone_number], (err, res) => {
             if (err) { return reject(err) }
-
+/*
             const userID = res.insertId
-
+            
             if (role == 'Student') {
                 const { major, student_number } = otherData;
                 conn.query('INSERT INTO Student (user_id, major, student_number) VALUES (?,?,?)', [userID, major, student_number], (err, res) => {
@@ -54,7 +54,9 @@ dataPool.registerUser = async (email, password, name, phoneNum, role, otherData)
             }
             else {
                 return reject(new Error("Invalid role"))
-            }
+            }*/
+            return resolve(res);
+            
         })
     })
 }
@@ -141,9 +143,14 @@ dataPool.getApartments = (startPrice, endPrice, location) => {
         let sql = 'SELECT * FROM Apartment WHERE 1=1'
         const params = []
 
-        if (startPrice !== undefined && endPrice !== undefined) {
-            sql += ' AND price BETWEEN ? AND ?'
-            params.push(startPrice, endPrice)
+        if (startPrice !== undefined) {
+            sql += ' AND price >= ?'
+            params.push(startPrice)
+        }
+
+        if (endPrice !== undefined) {
+            sql += ' AND price <= ?'
+            params.push(endPrice)
         }
 
         if (location) {
