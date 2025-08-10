@@ -26,3 +26,10 @@ export const getApartments = async () => {
   });
   return res.json();
 };
+
+export const getMyApartments = async (user_id) => {
+  const res = await fetch(`${API_URL}/my-apartments?user_id=${user_id}`, {
+    credentials: "include"
+  })
+  return res.json();
+}
