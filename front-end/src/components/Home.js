@@ -1,53 +1,62 @@
-import React, { useEffect, useState } from "react";
-import { getApartments } from "../services/api";
+import React from "react";
 import "./Home.css";
 
-function Home() {
-  const [apartments, setApartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const handleLogout = async () => {
+  try {
+    const res = await fetch('http://88.200.63.148:3009/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
 
-  useEffect(() => {
-    async function fetchApartments() {
-      try {
-        const data = await getApartments();
-        setApartments(data);
-      } catch (err) {
-        setError("Failed to load apartments.");
-      } finally {
-        setLoading(false);
-      }
+    if (res.ok) {
+      window.location.href = '/';
+    } else {
+      console.error('Logout failed');
     }
-    fetchApartments();
-  }, []);
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+};
 
+function Home() {
   return (
-    <div className="startpage-container">
-      <h1>Welcome to FlatFinder!</h1>
-      <p>Browse available apartments below:</p>
+    <div className="home-container">
+      <nav className="navbar">
+        <div className="navbar-logo">FlatFinder</div>
+        <ul className="navbar-links">
+          <li><a href="/apartments">Apartments</a></li>
+          <li><a href="/student-listings">Student Listings</a></li>
+          <li><a href="/messages">Messages</a></li>
+        </ul>
+        <div className="navbar-dropdown">
+          <button className="dropdown-btn">Account ▾</button>
+          <div className="dropdown-content">
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '10px',
+                margin: 0,
+                color: '#004aad',
+                cursor: 'pointer',
+                font: 'inherit',
+                textDecoration: 'underline'
+              }}
+            >
+              Logout
+            </button>
 
-      {loading && <p>Loading apartments...</p>}
-      {error && <p className="error">{error}</p>}
-
-      {!loading && !error && apartments.length === 0 && (
-        <p>No apartments found. Check back later!</p>
-      )}
-
-      <div className="apartment-list">
-        {apartments.map((apt) => (
-          <div key={apt.id} className="apartment-card">
-            <h3>{apt.title || "Untitled Apartment"}</h3>
-            <p>{apt.description || "No description provided."}</p>
-            <p>
-              <strong>Location:</strong> {apt.location || "Unknown"}
-            </p>
-            <p>
-              <strong>Price:</strong> ${apt.price || "N/A"} / month
-            </p>
-            <button>View Details</button>
           </div>
-        ))}
-      </div>
+        </div>
+      </nav>
+
+      <main className="home-main">
+        <h1>Welcome to FlatFinder</h1>
+        <p>Browse apartments, connect with students, and manage your listings easily.</p>
+      </main>
     </div>
   );
 }

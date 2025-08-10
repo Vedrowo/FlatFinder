@@ -35,26 +35,26 @@ dataPool.registerUser = async (email, password, name, phone_number, role) => {
     return new Promise((resolve, reject) => {
         conn.query(`INSERT INTO User (email , password, name, phone_number) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phone_number], (err, res) => {
             if (err) { return reject(err) }
-/*
+
             const userID = res.insertId
             
             if (role == 'Student') {
-                const { major, student_number } = otherData;
-                conn.query('INSERT INTO Student (user_id, major, student_number) VALUES (?,?,?)', [userID, major, student_number], (err, res) => {
+                //const { major, student_number } = otherData;
+                conn.query('INSERT INTO Student user_id = ?', [userID], (err, res) => {
                     if (err) { return reject(err) }
                     return resolve({ user_id: userID, role })
                 })
             }
             else if (role == 'Landlord') {
-                const { verified_status, agency_name } = otherData
-                conn.query('INSERT INTO Landlord (user_id, verified_status, agency_name) VALUES (?,?,?)', [userID, verified_status, agency_name], (err, res) => {
+                //const { verified_status, agency_name } = otherData
+                conn.query('INSERT INTO Landlord user_id = ?', [userID], (err, res) => {
                     if (err) { return reject(err) }
                     return resolve({ user_id: userID, role })
                 })
             }
             else {
                 return reject(new Error("Invalid role"))
-            }*/
+            }
             return resolve(res);
             
         })
@@ -77,6 +77,30 @@ dataPool.loginUser = async (email, password) => {
             }
 
             return resolve(user)
+        })
+    })
+}
+
+dataPool.addStudentData = (user_id, major, student_number) => {
+    return new Promise((resolve, reject) => {
+        conn.query('UPDATE Student SET major = ?, student_number = ? WHERE user_id = ?', [major, student_number, user_id], (err, res) =>  {
+            if (err) { return reject(err) }
+            if (res.affectedRows === 0) {
+                return reject(new Error('Student not found'))
+            }
+            return resolve(res)
+        })
+    })
+}
+
+dataPool.addLandlordData = (user_id, verified_status, agency_name) => {
+    return new Promise((resolve, reject) => {
+        conn.query('UPDATE Landlord SET verified_status = ?, agency_name = ? WHERE user_id = ?', [verified_status, agency_name, user_id], (err, res) => {
+            if (err) { return reject(err) }
+            if (res.affectedRows === 0) {
+                return reject(new Error('Landlord not found'))
+            }
+            return resolve(res)
         })
     })
 }
