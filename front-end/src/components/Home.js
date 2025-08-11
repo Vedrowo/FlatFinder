@@ -29,6 +29,7 @@ function Home() {
 
         <div className="navbar-links">
           <ul className="navbar-links">
+            <li><a href="/home">Home</a></li>
             <li><a href="/apartments">Apartments</a></li>
             <li><a href="/student-listings">Student Listings</a></li>
 

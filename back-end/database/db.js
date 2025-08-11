@@ -151,10 +151,15 @@ dataPool.setBio = (user_id, bio) => {
 
 dataPool.addApartment = (user_id, title, description, price, location, from, to, images) => {
     return new Promise((resolve, reject) => {
-        conn.query('INSERT INTO Apartment (user_id, title, description, price, location, available_from, available_to, images) VALUES (?,?,?,?,?,?,?,?)', [user_id, title, description, price, location, from, to, images], (err, res) => {
-            if (err) { return reject(err) }
-            return resolve(res)
-        })
+        const imagesJSON = JSON.stringify(images); // convert array to string
+        conn.query(
+            'INSERT INTO Apartment (user_id, title, description, price, location, available_from, available_to, images) VALUES (?,?,?,?,?,?,?,?)',
+            [user_id, title, description, price, location, from, to, imagesJSON],
+            (err, res) => {
+                if (err) { return reject(err) }
+                return resolve(res)
+            }
+        )
     })
 }
 
@@ -171,7 +176,15 @@ dataPool.getApartmentsFromLandlord = (user_id) => {
     return new Promise((resolve, reject) => {
         conn.query('SELECT * FROM Apartment WHERE user_id = ?', [user_id], (err, res) => {
             if (err) { return reject(err) }
-            return resolve(res)
+
+            const parsed = res.map(apartment => {
+                return {
+                    ...apartment,
+                    images: apartment.images ? JSON.parse(apartment.images) : []
+                };
+            });
+
+            return resolve(parsed)
         })
     })
 }
@@ -198,19 +211,53 @@ dataPool.getApartments = (startPrice, endPrice, location) => {
 
         conn.query(sql, params, (err, res) => {
             if (err) return reject(err)
-            resolve(res)
+            const parsed = res.map(apartment => {
+                return {
+                    ...apartment,
+                    images: apartment.images ? JSON.parse(apartment.images) : []
+                };
+            });
+
+            return resolve(parsed)
         })
     })
 }
 
 dataPool.getApartment = (apartment_id) => {
-    return new Promise((resolve, reject) => {
-        conn.query('SELECT * FROM Apartment WHERE apartment_id = ?', [apartment_id], (err, res) => {
-            if (err) { return reject(err) }
-            return resolve(res)
-        })
-    })
-}
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT a.*, u.user_id AS landlord_id, u.username AS landlord_name
+      FROM Apartment a
+      JOIN User u ON a.user_id = u.user_id
+      WHERE a.apartment_id = ?
+    `;
+
+    conn.query(query, [apartment_id], (err, res) => {
+      if (err) return reject(err);
+      if (res.length === 0) return resolve(null);
+
+      const row = res[0];
+      const apartment = {
+        apartment_id: row.apartment_id,
+        user_id: row.user_id,
+        title: row.title,
+        description: row.description,
+        price: row.price,
+        location: row.location,
+        available_from: row.available_from,
+        available_to: row.available_to,
+        images: row.images ? JSON.parse(row.images) : [],
+        landlord: {
+          user_id: row.landlord_id,
+          username: row.landlord_name,
+        }
+      };
+
+      resolve(apartment);
+    });
+  });
+};
+
 
 dataPool.addStudentListing = (user_id, location_preference, price_range, description, move_in_date) => {
     return new Promise((resolve, reject) => {
@@ -233,6 +280,15 @@ dataPool.removeStudentListing = (request_id) => {
 dataPool.getStudentListings = () => {
     return new Promise((resolve, reject) => {
         conn.query('SELECT * FROM StudentListing', (err, res) => {
+            if (err) { return reject(err) }
+            return resolve(res)
+        })
+    })
+}
+
+dataPool.getStudentListingsForUser = (user_id) => {
+    return new Promise((resolve, reject) => {
+        conn.query('SELECT * FROM StudentListings WHERE user_id = ?', [user_id], (err, res) => {
             if (err) { return reject(err) }
             return resolve(res)
         })

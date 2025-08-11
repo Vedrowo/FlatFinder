@@ -16,3 +16,5 @@ myApartments.get('/', async (req, res, next) => {
     res.sendStatus(500);
   }
 });
+
+module.exports = myApartments;

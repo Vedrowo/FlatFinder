@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3009;
 
 app.use(cors({
-  origin: 'http://88.200.63.148:4009',
+  origin: 'http://localhost:4009',
   methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
   credentials: true
 }))
@@ -38,7 +38,10 @@ const apartments = require('./routes/apartments')
 app.use('/apartments', apartments)
 
 const myApartments = require('./routes/myApartments')
-app.use('/my-apartments')
+app.use('/my-apartments', myApartments)
+
+const StudentListings = require('./routes/studentListings')
+app.use('/student-listings', StudentListings)
 
 const dataPool = require('./database/db.js')
 

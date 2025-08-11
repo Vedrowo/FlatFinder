@@ -10,74 +10,88 @@ function Home() {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    color: "#fff",
+    backgroundColor: "#AEC8A4", 
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: "0 1rem",
+    padding: "2rem",
     textAlign: "center",
   };
 
+  const cardStyle = {
+    backgroundColor: "#E7EFC7", 
+    padding: "3rem 4rem",
+    borderRadius: "16px",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    maxWidth: "480px",
+    width: "100%",
+  };
+
   const titleStyle = {
-    fontSize: "3rem",
-    marginBottom: "0.5rem",
-    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+    fontSize: "2.8rem",
+    marginBottom: "1rem",
+    color: "#8A784E", // warm brown
+    fontWeight: "700",
   };
 
   const subtitleStyle = {
-    fontSize: "1.25rem",
-    marginBottom: "2rem",
-    fontWeight: "300",
+    fontSize: "1.3rem",
+    marginBottom: "5rem",
+    color: "#3B3B1A", // deep olive green
+    fontWeight: "500",
   };
 
   const buttonGroupStyle = {
     display: "flex",
-    gap: "1rem",
+    gap: "1.5rem",
+    justifyContent: "center",
   };
 
   const buttonStyle = {
-    padding: "0.75rem 2rem",
-    fontSize: "1rem",
-    borderRadius: "25px",
+    padding: "0.85rem 2.5rem",
+    fontSize: "1.1rem",
+    borderRadius: "12px",
     border: "none",
     cursor: "pointer",
     fontWeight: "600",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+    boxShadow: "0 6px 15px rgba(0,0,0,0.1)",
     transition: "background-color 0.3s ease",
   };
 
   const registerButtonStyle = {
     ...buttonStyle,
-    backgroundColor: "#48bb78", // green
-    color: "#fff",
+    backgroundColor: "#8A784E", // warm brown
+    color: "white",
   };
 
   const loginButtonStyle = {
     ...buttonStyle,
-    backgroundColor: "#3182ce", // blue
-    color: "#fff",
+    backgroundColor: "#3B3B1A", // dark olive green
+    color: "white",
   };
+
 
   return (
     <div style={containerStyle}>
-      <h1 style={titleStyle}>Welcome to FlatFinder</h1>
-      <p style={subtitleStyle}>Your one-stop platform for student apartment rentals.</p>
-      <div style={buttonGroupStyle}>
-        <button
-          style={registerButtonStyle}
-          onClick={() => navigate("/register")}
-          onMouseOver={e => (e.target.style.backgroundColor = "#38a169")}
-          onMouseOut={e => (e.target.style.backgroundColor = "#48bb78")}
-        >
-          Register
-        </button>
-        <button
-          style={loginButtonStyle}
-          onClick={() => navigate("/login")}
-          onMouseOver={e => (e.target.style.backgroundColor = "#2c5282")}
-          onMouseOut={e => (e.target.style.backgroundColor = "#3182ce")}
-        >
-          Login
-        </button>
+      <div style={cardStyle}>
+        <h1 style={titleStyle}>Welcome to FlatFinder</h1>
+        <p style={subtitleStyle}>Simplifying student living.</p>
+        <div style={buttonGroupStyle}>
+          <button
+            style={registerButtonStyle}
+            onClick={() => navigate("/register")}
+            onMouseOver={e => (e.target.style.backgroundColor = "#7a6a3f")}
+            onMouseOut={e => (e.target.style.backgroundColor = "#8A784E")}
+          >
+            Register
+          </button>
+          <button
+            style={loginButtonStyle}
+            onClick={() => navigate("/login")}
+            onMouseOver={e => (e.target.style.backgroundColor = "#323319")}
+            onMouseOut={e => (e.target.style.backgroundColor = "#3B3B1A")}
+          >
+            Login
+          </button>
+        </div>
       </div>
     </div>
   );

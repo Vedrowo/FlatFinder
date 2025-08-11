@@ -1,0 +1,97 @@
+.profile-container {
+  max-width: 600px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-username {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.profile-section {
+  margin-bottom: 18px;
+}
+
+.profile-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.profile-text,
+.profile-textarea,
+.profile-input {
+  width: 100%;
+  font-size: 1rem;
+  color: #333;
+  border-radius: 5px;
+}
+
+.profile-text {
+  padding: 10px 12px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  min-height: 50px;
+  white-space: pre-wrap; /* keep line breaks */
+}
+
+.profile-textarea {
+  min-height: 80px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.profile-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.profile-input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s ease;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.profile-save-btn {
+  display: block;
+  margin: 25px auto 0;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+  transition: background-color 0.3s ease;
+}
+
+.profile-save-btn:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 640px) {
+  .profile-container {
+    margin: 20px 15px;
+    padding: 20px;
+  }
+}
