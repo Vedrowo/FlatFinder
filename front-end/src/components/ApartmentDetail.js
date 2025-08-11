@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getApartmentById } from "../services/api"; 
+import { getApartmentById } from "../services/api";
 import "./ApartmentDetail.css";
 import { MdMessage } from "react-icons/md";
 
@@ -35,6 +35,7 @@ function parseImages(images) {
 function ApartmentDetail() {
   const role = localStorage.getItem("role");
   const name = localStorage.getItem("name");
+  const user_id = localStorage.getItem("user_id")
   const { apartmentId } = useParams();
   const navigate = useNavigate();
 
@@ -59,7 +60,7 @@ function ApartmentDetail() {
 
   const images = parseImages(apartment.images);
   const backendURL = "http://88.200.63.148:3009";
-  const mainImage = images.length > 0 
+  const mainImage = images.length > 0
     ? `${backendURL}${images[currentImageIndex]}`
     : "/placeholder.jpg";
 
@@ -162,6 +163,30 @@ function ApartmentDetail() {
           </span>
         </p>
         <p>{apartment.description}</p>
+        <button className="application-button"
+          onClick={async () => {
+            try {
+              const res = await fetch(`http://88.200.63.148:3009/application-request`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: user_id ,apartment_id: apartment.id }),
+              });
+
+              if (res.ok) {
+                alert("Application request sent!");
+              } else {
+                alert("Failed to send application request.");
+              }
+            } catch (err) {
+              alert("Error sending application request.");
+              console.error(err);
+            }
+          }}
+        >
+          Apply for this Apartment
+        </button>
+
       </div>
     </div>
   );

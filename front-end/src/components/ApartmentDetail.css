@@ -9,6 +9,13 @@
   color: #222;
 }
 
+.application-button {
+  background-color: #8A784E;
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: white;
+}
+
 .apartment-detail-container h2 {
   font-size: 2rem;
   margin-bottom: 20px;

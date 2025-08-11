@@ -1,9 +1,7 @@
-/* Login.css */
-
 .auth-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
-  background-color: #AEC8A4; /* same as home background */
+  background-color: #AEC8A4; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,14 +9,14 @@
 }
 
 .auth-card {
-  background-color: #E7EFC7; /* same as navbar background */
+  background-color: #E7EFC7; 
   padding: 2.5rem 3rem;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   width: 100%;
   max-width: 400px;
   text-align: center;
-  color: #3B3B1A; /* dark text color consistent with home */
+  color: #3B3B1A; 
 }
 
 .auth-card h2 {
@@ -111,8 +109,6 @@
   color: #8A784E;
 }
 
-
-/* Responsive */
 @media (max-width: 480px) {
   .auth-card {
     padding: 2rem 1.5rem;
