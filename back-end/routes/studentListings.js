@@ -21,7 +21,7 @@ StudentListings.post('/', async (req, res) => {
   }
 
   try {
-    const result = await dataPool.addStudentListing(user_id, location_preference, price_range, description, move_in_date);
+    const result = await db.addStudentListing(user_id, location_preference, price_range, description, move_in_date);
     res.status(201).json({ message: "Listing created", request_id: result.insertId });
   } catch (error) {
     console.error(error);

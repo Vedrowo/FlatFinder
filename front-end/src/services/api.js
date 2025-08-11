@@ -35,7 +35,7 @@ export const getMyApartments = async (user_id) => {
 }
 
 export async function createApartment(formData) {
-  const response = await fetch("API_URL/apartments", {
+  const response = await fetch(`${API_URL}/apartments`, {
     method: "POST",
     body: formData, // Send FormData directly
     credentials: 'include', // if needed

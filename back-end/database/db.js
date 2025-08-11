@@ -6,20 +6,15 @@ const { hashPassword } = require('../utils/password');
 const { comparePasswords } = require('../utils/password');
 const { resolve } = require('path');
 
-const conn = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_DATABASE
-})
-
-conn.connect((err) => {
-    if (err) {
-        console.log('Error: ' + err);
-        return;
-    }
-    console.log('Connection established!')
-})
+const conn = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_DATABASE,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 let dataPool = {}
 
@@ -72,21 +67,21 @@ dataPool.loginUser = async (email, password) => {
                 return reject(new Error('Invalid password'))
             }
 
-            conn.query('SELECT * FROM Landlord WHERE user_id = ?', [user.id], (err, landlordRes) => {
+            conn.query('SELECT * FROM Landlord WHERE user_id = ?', [user.user_id], (err, landlordRes) => {
                 if (err) return reject(err);
 
                 if (landlordRes.length > 0) {
-                    user.role = "landlord";
+                    user.role = "Landlord";
                     return resolve(user);
                 }
 
-                conn.query('SELECT * FROM Student WHERE user_id = ?', [user.id], (err, studentRes) => {
+                conn.query('SELECT * FROM Student WHERE user_id = ?', [user.user_id], (err, studentRes) => {
                     if (err) return reject(err);
 
                     if (studentRes.length > 0) {
-                        user.role = "student";
+                        user.role = "Student";
                     } else {
-                        user.role = null; // Or "unknown"
+                        user.role = null; 
                     }
                     return resolve(user);
                 })
@@ -142,7 +137,7 @@ dataPool.checkEmailExists = (email) => {
 
 dataPool.setBio = (user_id, bio) => {
     return new Promise((resolve, reject) => {
-        conn.query('UPDATE User SET bio = ? WHERE user_id = ?', [user_id, bio], (err, res) => {
+        conn.query('UPDATE User SET bio = ? WHERE user_id = ?', [bio, user_id], (err, res) => {
             if (err) { return reject(err) }
             return resolve(res)
         })
@@ -151,10 +146,9 @@ dataPool.setBio = (user_id, bio) => {
 
 dataPool.addApartment = (user_id, title, description, price, location, from, to, images) => {
     return new Promise((resolve, reject) => {
-        const imagesJSON = JSON.stringify(images); // convert array to string
         conn.query(
             'INSERT INTO Apartment (user_id, title, description, price, location, available_from, available_to, images) VALUES (?,?,?,?,?,?,?,?)',
-            [user_id, title, description, price, location, from, to, imagesJSON],
+            [user_id, title, description, price, location, from, to, images],
             (err, res) => {
                 if (err) { return reject(err) }
                 return resolve(res)
@@ -226,7 +220,7 @@ dataPool.getApartments = (startPrice, endPrice, location) => {
 dataPool.getApartment = (apartment_id) => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT a.*, u.user_id AS landlord_id, u.username AS landlord_name
+      SELECT a.*, u.user_id AS landlord_id, u.name AS landlord_name
       FROM Apartment a
       JOIN User u ON a.user_id = u.user_id
       WHERE a.apartment_id = ?
@@ -288,7 +282,7 @@ dataPool.getStudentListings = () => {
 
 dataPool.getStudentListingsForUser = (user_id) => {
     return new Promise((resolve, reject) => {
-        conn.query('SELECT * FROM StudentListings WHERE user_id = ?', [user_id], (err, res) => {
+        conn.query('SELECT * FROM StudentListing WHERE user_id = ?', [user_id], (err, res) => {
             if (err) { return reject(err) }
             return resolve(res)
         })
@@ -306,7 +300,7 @@ dataPool.sendApplicationRequest = (user_id, apartment_id) => {
 
 dataPool.getApplicationRequestsByLandlord = (landlordId) => {
     return new Promise((resolve, reject) => {
-        connection.query(
+        conn.query(
             `SELECT ar.application_id, ar.apartment_id, ar.user_id AS student_id,
         a.title AS apartment_title, a.location, a.price,
         u.name AS student_name, u.email AS student_email,

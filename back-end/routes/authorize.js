@@ -9,7 +9,7 @@ router.post('/login', async (req, res) => {
   try {
     const user = await dataPool.loginUser(email, password);
     req.session.user = {
-      id: user.user_id,
+      user_id: user.user_id,
       name: user.name,
       email: user.email,
       role: user.role

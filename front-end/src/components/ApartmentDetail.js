@@ -21,112 +21,150 @@ const handleLogout = async () => {
   }
 };
 
+function parseImages(images) {
+  if (!images) return [];
+  if (Array.isArray(images)) return images;
+
+  try {
+    return JSON.parse(images);
+  } catch {
+    return [images];
+  }
+}
+
 function ApartmentDetail() {
-    const role = localStorage.getItem("role")
-    const { apartmentId } = useParams();
-    const navigate = useNavigate();
+  const role = localStorage.getItem("role");
+  const name = localStorage.getItem("name");
+  const { apartmentId } = useParams();
+  const navigate = useNavigate();
 
-    const [apartment, setApartment] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [apartment, setApartment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    useEffect(() => {
-        getApartmentById(apartmentId)
-            .then(data => {
-                setApartment(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, [apartmentId]);
+  useEffect(() => {
+    getApartmentById(apartmentId)
+      .then(data => {
+        setApartment(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [apartmentId]);
 
-    if (loading) return <p>Loading apartment details...</p>;
-    if (!apartment) return <p>Apartment not found.</p>;
+  if (loading) return <p>Loading apartment details...</p>;
+  if (!apartment) return <p>Apartment not found.</p>;
 
-    const handleLandlordClick = () => {
-        navigate(`/profile/${apartment.landlord_user_id}`);
-    };
+  const images = parseImages(apartment.images);
+  const backendURL = "http://88.200.63.148:3009";
+  const mainImage = images.length > 0 
+    ? `${backendURL}${images[currentImageIndex]}`
+    : "/placeholder.jpg";
 
-    return (
-        <div className="container">
-            <nav className="navbar">
-                <div className="navbar-logo">FlatFinder</div>
+  const handleLandlordClick = () => {
+    navigate(`/profile/${apartment.landlord_user_id}`);
+  };
 
-                <div className="navbar-links">
-                    <ul className="navbar-links">
-                        <li><a href="/home">Home</a></li>
-                        <li><a href="/apartments">Apartments</a></li>
-                        <li><a href="/student-listings">Student Listings</a></li>
+  return (
+    <div className="container">
+      <nav className="navbar">
+        <div className="navbar-logo">FlatFinder</div>
 
-                        {role === "student" && (
-                            <li><a href="/my-student-listings">My Requests</a></li>
-                        )}
+        <div className="navbar-links">
+          <ul className="navbar-links">
+            <li><a href="/home">Home</a></li>
+            <li><a href="/apartments">Apartments</a></li>
+            <li><a href="/student-listings">Student Listings</a></li>
 
-                        {role === "landlord" && (
-                            <>
-                                <li><a href="/my-apartments">My Apartments</a></li>
-                            </>
-                        )}
+            {role === "student" && (
+              <li><a href="/my-student-listings">My Requests</a></li>
+            )}
 
-                        <li><a href="/messages">
-                            <MdMessage style={{ marginRight: "5px", verticalAlign: "middle" }} />
-                            Messages
-                        </a></li>
-                    </ul>
-                </div>
+            {role === "landlord" && (
+              <>
+                <li><a href="/my-apartments">My Apartments</a></li>
+              </>
+            )}
 
-                <div className="navbar-search">
-                    <input type="text" placeholder="Search..." className="navbar-search" />
-                </div>
-
-                <div className="navbar-dropdown">
-                    <button className="dropdown-btn">Account ▾</button>
-                    <div className="dropdown-content">
-                        <a href="/profile">Profile</a>
-                        <a href="/settings">Settings</a>
-                        <button
-                            onClick={handleLogout}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                padding: '10px',
-                                margin: 0,
-                                color: '#004aad',
-                                cursor: 'pointer',
-                                font: 'inherit',
-                                textDecoration: 'underline'
-                            }}
-                        >
-                            Logout
-                        </button>
-
-                    </div>
-                </div>
-            </nav>
-            <div className="apartment-detail-container">
-                <h2>{apartment.title}</h2>
-                <img
-                    src={apartment.images?.[0] || "/placeholder.jpg"}
-                    alt={apartment.title}
-                    className="apartment-detail-image"
-                />
-                <p><strong>Location:</strong> {apartment.location}</p>
-                <p><strong>Price:</strong> ${apartment.price.toLocaleString()}</p>
-                <p><strong>Available from:</strong> {new Date(apartment.available_from).toLocaleDateString()}</p>
-                <p>
-                    <strong>Landlord: </strong>
-                    <span
-                        onClick={handleLandlordClick}
-                        style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-                    >
-                        {apartment.landlord_name || "Unknown"}
-                    </span>
-                </p>
-                <p>{apartment.description}</p>
-            </div>
+            <li><a href="/messages">
+              <MdMessage style={{ marginRight: "5px", verticalAlign: "middle" }} />
+              Messages
+            </a></li>
+          </ul>
         </div>
-    );
+
+        <div className="navbar-search">
+          <input type="text" placeholder="Search..." className="navbar-search" />
+        </div>
+
+        <div className="navbar-dropdown">
+          <button className="dropdown-btn">Account ▾</button>
+          <div className="dropdown-content">
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '10px',
+                margin: 0,
+                color: '#004aad',
+                cursor: 'pointer',
+                font: 'inherit',
+                textDecoration: 'underline'
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="apartment-detail-container">
+        <h2>{apartment.title}</h2>
+
+        <div className="image-gallery">
+          <img
+            src={mainImage}
+            alt={`${apartment.title} - ${currentImageIndex + 1}`}
+            className="apartment-detail-image"
+          />
+
+          {images.length > 1 && (
+            <div className="thumbnail-list">
+              {images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={`${backendURL}${img}`}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className={`thumbnail-image ${idx === currentImageIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  style={{ cursor: "pointer", border: idx === currentImageIndex ? "2px solid #004aad" : "1px solid #ccc" }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p><strong>Location:</strong> {apartment.location}</p>
+        <p><strong>Price:</strong> ${apartment.price.toLocaleString()}</p>
+        <p><strong>Available from:</strong> {new Date(apartment.available_from).toLocaleDateString()}</p>
+        <p>
+          <strong>Landlord: </strong>
+          <span
+            onClick={handleLandlordClick}
+            style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+          >
+            {name || "Unknown"}
+          </span>
+        </p>
+        <p>{apartment.description}</p>
+      </div>
+    </div>
+  );
 }
 
 export default ApartmentDetail;

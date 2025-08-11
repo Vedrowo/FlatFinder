@@ -21,6 +21,9 @@ const handleLogout = async () => {
 
 function Home() {
   const role = localStorage.getItem("role")
+  const user = localStorage.getItem("user_id")
+  console.log("Role returned from server:", role);
+  console.log("User returned from server: ", user)
 
   return (
     <div className="home-container">
@@ -33,11 +36,11 @@ function Home() {
             <li><a href="/apartments">Apartments</a></li>
             <li><a href="/student-listings">Student Listings</a></li>
 
-            {role === "student" && (
+            {role === "Student" && (
               <li><a href="/my-student-listings">My Requests</a></li>
             )}
 
-            {role === "landlord" && (
+            {role === "Landlord" && (
               <>
                 <li><a href="/my-apartments">My Apartments</a></li>
               </>

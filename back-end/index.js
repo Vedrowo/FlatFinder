@@ -7,11 +7,15 @@ const session = require('express-session');
 const app = express();
 const port = process.env.PORT || 3009;
 
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use(cors({
-  origin: 'http://localhost:4009',
+  origin: 'http://88.200.63.148:4009',
   methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
-  credentials: true
-}))
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -28,8 +32,6 @@ app.use(session({
 
 app.set('json spaces', 2)
 
-const path = require ('path')
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
@@ -42,6 +44,9 @@ app.use('/my-apartments', myApartments)
 
 const StudentListings = require('./routes/studentListings')
 app.use('/student-listings', StudentListings)
+
+const MyStudentListings = require('./routes/myListings')
+app.use('/my-student-listings', MyStudentListings)
 
 const dataPool = require('./database/db.js')
 

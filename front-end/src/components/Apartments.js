@@ -4,6 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { MdMessage } from "react-icons/md";
 import "./Apartments.css";
 
+function parseImages(images) {
+  if (!images) return [];
+  if (Array.isArray(images)) return images;
+
+  try {
+    return JSON.parse(images);
+  } catch {
+    return [images];
+  }
+}
+
 function Apartments() {
   const [apartments, setApartments] = useState([]);
   const navigate = useNavigate();
@@ -80,14 +91,16 @@ function Apartments() {
         {apartments.length === 0 && <p>No apartments found.</p>}
         <div className="apartments-list">
           {apartments.map(apartment => {
-            const mainImage = apartment.images && apartment.images.length > 0
-              ? apartment.images[0]
-              : "/placeholder.jpg"; 
+            const parsedImages = parseImages(apartment.images);
+            const mainImage = parsedImages.length > 0
+              ? `http://88.200.63.148:3009${parsedImages[0]}`
+              : "/placeholder.jpg";
 
             const availableFromDate = new Date(apartment.available_from);
             const availableFromFormatted = availableFromDate.toLocaleDateString(undefined, {
               year: 'numeric', month: 'short', day: 'numeric'
             });
+
 
             return (
               <div

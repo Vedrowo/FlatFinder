@@ -12,8 +12,10 @@ function Login() {
     e.preventDefault();
     const data = await loginUser(email, password);
     if (data.message === "Login successful") {
-      localStorage.setItem("data", data.role);
-      localStorage.setItem("user", data.user_id)
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("user_id", data.user.user_id)
+      localStorage.setItem("name", data.user.name)
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
       navigate("/home");
     } else {
       alert(data.message || "Login failed");

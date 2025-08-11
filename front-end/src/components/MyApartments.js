@@ -10,7 +10,7 @@ function MyApartments() {
   const [location, setLocation] = useState("");
   const [availableFrom, setAvailableFrom] = useState("");
   const [availableTo, setAvailableTo] = useState("");
-  const [images, setImages] = useState(""); // simple comma-separated URLs
+  const [images, setImages] = useState([]);
   const [apartments, setApartments] = useState([]);
   const role = localStorage.getItem("role")
 
@@ -61,7 +61,6 @@ function MyApartments() {
     formData.append("available_from", availableFrom);
     formData.append("available_to", availableTo || null);
 
-    // Append each selected file to formData
     for (let i = 0; i < images.length; i++) {
       formData.append("images", images[i]);
     }
@@ -78,7 +77,6 @@ function MyApartments() {
       setAvailableTo("");
       setImages([]);
 
-      // Refresh apartments list
       const updated = await getMyApartments(user_id);
       setApartments(updated);
 
@@ -87,6 +85,17 @@ function MyApartments() {
       alert("Failed to publish apartment");
     }
   };
+
+  function parseImages(images) {
+    if (!images) return [];
+    if (Array.isArray(images)) return images;
+
+    try {
+      return JSON.parse(images);
+    } catch {
+      return [images];
+    }
+  }
 
 
   return (
@@ -219,18 +228,22 @@ function MyApartments() {
                   <p>Price: ${apartment.price}</p>
                   <p>Available From: {apartment.available_from}</p>
                   <p>Available To: {apartment.available_to || "N/A"}</p>
-                  {apartment.images && apartment.images.length > 0 && (
+                  {apartment.images && (
                     <div>
                       Images:
-                      <ul>
-                        {apartment.images.map((img, idx) => (
-                          <li key={idx}>
-                            <a href={img} target="_blank" rel="noreferrer">{img}</a>
-                          </li>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        {parseImages(apartment.images).map((imgSrc, idx) => (
+                          <img
+                            key={idx}
+                            src={`http://88.200.63.148:3009${imgSrc}`}
+                            alt={`Apartment ${idx + 1}`}
+                            style={{ width: '150px', height: 'auto', borderRadius: '4px' }}
+                          />
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
+
                 </li>
               ))}
             </ul>
