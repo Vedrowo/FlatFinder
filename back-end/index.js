@@ -37,6 +37,9 @@ app.get("/", (req, res) => {
 const apartments = require('./routes/apartments')
 app.use('/apartments', apartments)
 
+const myApartments = require('./routes/myApartments')
+app.use('/my-apartments')
+
 const dataPool = require('./database/db.js')
 
 const authorize = require('./routes/authorize');
