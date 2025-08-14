@@ -18,7 +18,6 @@ function parseImages(images) {
 function Apartments() {
   const [apartments, setApartments] = useState([]);
   const navigate = useNavigate();
-
   const role = localStorage.getItem("role");
 
   const handleLogout = () => {
@@ -31,7 +30,7 @@ function Apartments() {
   }, []);
 
   return (
-    <div className="apartments-container">
+    <div className="all-apartments-container">
       <nav className="navbar">
         <div className="navbar-logo">FlatFinder</div>
 
@@ -41,11 +40,11 @@ function Apartments() {
             <li><a href="/apartments">Apartments</a></li>
             <li><a href="/student-listings">Student Listings</a></li>
 
-            {role === "student" && (
+            {role === "Student" && (
               <li><a href="/my-student-listings">My Requests</a></li>
             )}
 
-            {role === "landlord" && (
+            {role === "Landlord" && (
               <>
                 <li><a href="/my-apartments">My Apartments</a></li>
               </>
@@ -86,10 +85,10 @@ function Apartments() {
           </div>
         </div>
       </nav>
-      <div className="available-apartments">
+      <div className="all-available-apartments">
         <h2>Available Apartments</h2>
         {apartments.length === 0 && <p>No apartments found.</p>}
-        <div className="apartments-list">
+        <div className="all-apartments-list">
           {apartments.map(apartment => {
             const parsedImages = parseImages(apartment.images);
             const mainImage = parsedImages.length > 0

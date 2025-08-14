@@ -30,11 +30,11 @@ function StudentListings() {
                         <li><a href="/apartments">Apartments</a></li>
                         <li><a href="/student-listings">Student Listings</a></li>
 
-                        {role === "student" && (
+                        {role === "Student" && (
                             <li><a href="/my-student-listings">My Requests</a></li>
                         )}
 
-                        {role === "landlord" && (
+                        {role === "Landlord" && (
                             <>
                                 <li><a href="/my-apartments">My Apartments</a></li>
                             </>

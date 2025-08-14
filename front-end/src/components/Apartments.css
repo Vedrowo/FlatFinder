@@ -1,4 +1,4 @@
-.apartments-container {
+.all-apartments-container {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
     background-color: #AEC8A4;
@@ -7,9 +7,9 @@
     background-size: auto;
 }
 
-.available-apartments {
+.all-available-apartments {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 90%;
     margin: 0 auto;
     font-size: 1.2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,7 +21,7 @@
     color: #3B3B1A;
 }
 
-.apartments-list {
+.all-apartments-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;

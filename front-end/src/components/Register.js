@@ -15,10 +15,9 @@ function Register() {
     e.preventDefault();
     const data = await registerUser(name, email, password, phone_number, role);
     if (data.message === 'User registered successfully') {
-      localStorage.setItem("role", data.role)
-      localStorage.setItem("user_id", data.user_id)
+      localStorage.setItem("role", data.user.role)
+      localStorage.setItem("user_id", data.user.user_id)
       localStorage.setItem("name", data.user.name)
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
       navigate("/home");
     } else {
       alert(data.message || "Registration failed");

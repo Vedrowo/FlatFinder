@@ -36,13 +36,27 @@ dataPool.registerUser = async (email, password, name, phone_number, role) => {
             if (role == 'Student') {
                 conn.query('INSERT INTO Student (user_id) VALUES (?)', [userID], (err, res) => {
                     if (err) { return reject(err) }
-                    return resolve({ user_id: userID, role })
+                    return resolve({
+                        user: {
+                            user_id: userID,
+                            role,
+                            name,
+                            email
+                        }
+                    })
                 })
             }
             else if (role == 'Landlord') {
                 conn.query('INSERT INTO Landlord (user_id) VALUES (?)', [userID], (err, res) => {
                     if (err) { return reject(err) }
-                    return resolve({ user_id: userID, role })
+                    return resolve({
+                        user: {
+                            user_id: userID,
+                            role,
+                            name,
+                            email
+                        }
+                    })
                 })
             }
             else {

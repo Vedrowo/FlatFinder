@@ -79,11 +79,11 @@ function ApartmentDetail() {
             <li><a href="/apartments">Apartments</a></li>
             <li><a href="/student-listings">Student Listings</a></li>
 
-            {role === "student" && (
+            {role === "Student" && (
               <li><a href="/my-student-listings">My Requests</a></li>
             )}
 
-            {role === "landlord" && (
+            {role === "Landlord" && (
               <>
                 <li><a href="/my-apartments">My Apartments</a></li>
               </>
@@ -135,20 +135,31 @@ function ApartmentDetail() {
           />
 
           {images.length > 1 && (
-            <div className="thumbnail-list">
-              {images.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={`${backendURL}${img}`}
-                  alt={`Thumbnail ${idx + 1}`}
-                  className={`thumbnail-image ${idx === currentImageIndex ? 'active' : ''}`}
-                  onClick={() => setCurrentImageIndex(idx)}
-                  style={{ cursor: "pointer", border: idx === currentImageIndex ? "2px solid #004aad" : "1px solid #ccc" }}
-                />
-              ))}
-            </div>
+            <>
+              <button
+                className="slideshow-button prev"
+                onClick={() =>
+                  setCurrentImageIndex((prev) =>
+                    prev === 0 ? images.length - 1 : prev - 1
+                  )
+                }
+              >
+                ‹
+              </button>
+              <button
+                className="slideshow-button next"
+                onClick={() =>
+                  setCurrentImageIndex((prev) =>
+                    prev === images.length - 1 ? 0 : prev + 1
+                  )
+                }
+              >
+                ›
+              </button>
+            </>
           )}
         </div>
+
 
         <p><strong>Location:</strong> {apartment.location}</p>
         <p><strong>Price:</strong> ${apartment.price.toLocaleString()}</p>
@@ -170,7 +181,7 @@ function ApartmentDetail() {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: user_id ,apartment_id: apartment.id }),
+                body: JSON.stringify({ user_id: user_id, apartment_id: apartment.id }),
               });
 
               if (res.ok) {
