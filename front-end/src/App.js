@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Apartments from "./components/Apartments";
@@ -9,12 +9,8 @@ import StartPage from "./components/StartPage"
 import StudentListings from "./components/StudentListings";
 import MyListings from "./components/MyListings";
 import Profile from "./components/Profile";
+import EditProfile from "./components/EditProfile"
 import ApartmentDetail from './components/ApartmentDetail';
-
-function ProfileWrapper() {
-  const { userId } = useParams();
-  return <Profile profileUserId={userId} />;
-}
 
 function App() {
   return (
@@ -28,8 +24,8 @@ function App() {
         <Route path="/my-apartments" element={<MyApartments />} />
         <Route path="/student-listings" element={<StudentListings />} />
         <Route path="/my-listings" element={<MyListings />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/:userId" element={<ProfileWrapper />} />
+        <Route path="/profile/:userId/edit" element={<EditProfile />} />
+        <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/apartment/:apartmentId" element={<ApartmentDetail />} />
 
       </Routes>

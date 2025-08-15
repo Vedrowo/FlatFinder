@@ -51,6 +51,9 @@ app.use('/my-student-listings', MyStudentListings)
 const ApplicationRequest = require('./routes/applicationRequest')
 app.use('/application-request', ApplicationRequest)
 
+const Profile = require('./routes/profile');
+app.use('/profile', Profile)
+
 const dataPool = require('./database/db.js')
 
 const authorize = require('./routes/authorize');

@@ -12,45 +12,41 @@
   align-items: center;
   background-color: #E7EFC7;
   padding: 0.8rem 2rem;
-  color: #8A784E; /* fix: use visible color */
+  color: #8A784E; 
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   gap: 2rem;
-  flex-wrap: nowrap; /* prevent wrapping */
+  flex-wrap: nowrap; 
 }
 
-/* Logo stays left */
 .navbar-logo {
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   font-weight: bold;
   color: #8A784E;
   flex-shrink: 0;
 }
 
-/* Navbar links get flex-grow to fill space */
 .navbar-links {
   font-size: 1.2rem;
   font-weight: bold;
   list-style: none;
   display: flex;
   gap: 1.5rem;
-  flex-grow: 1;           /* take all available space */
-  flex-shrink: 1;         /* shrink if needed */
-  overflow-x: auto;       /* scroll if too many links */
-  white-space: nowrap;    /* keep links on one line */
+  flex-grow: 1;           
+  flex-shrink: 1;         
+  overflow-x: auto;       
+  white-space: nowrap;    
 }
 
-/* Search bar pushed right */
 .navbar-search {
-  margin-left: auto; /* push it as far right as possible */
-  width: 250px;      /* fixed width for consistency */
+  margin-left: auto; 
+  width: 250px;      
   padding: 6px 10px;
   border-radius: 8px;
   border: none;
   outline: none;
-  flex-shrink: 0;    /* don’t shrink */
+  flex-shrink: 0;    
 }
 
-/* Navbar links a & hover (unchanged) */
 .navbar-links a {
   text-decoration: none;
   color: #8A784E;

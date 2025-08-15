@@ -85,4 +85,19 @@ apartments.get('/:apartment_id', async (req, res, next) => {
   }
 });
 
+apartments.get('/profile/:user_id', async (req, res, next) => {
+  const user_id = req.params.user_id;
+  try {
+    const name = await db.getApartmentOwner(user_id);
+
+    if (!name) {
+      return res.status(404).json({ error: "Landlord not found" })
+    }
+    res.json(name)
+  } catch (err) {
+    console.error(err)
+    res.sendStatus(500)
+  }
+})
+
 module.exports = apartments;

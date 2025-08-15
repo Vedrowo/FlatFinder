@@ -2,9 +2,11 @@ import React from "react";
 import "./Home.css";
 import { MdMessage } from "react-icons/md";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const handleLogout = async () => {
   try {
-    const res = await fetch('http://88.200.63.148:3009/auth/logout', {
+    const res = await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -37,7 +39,7 @@ function Home() {
             <li><a href="/student-listings">Student Listings</a></li>
 
             {role === "Student" && (
-              <li><a href="/my-student-listings">My Requests</a></li>
+              <li><a href="/my-listings">My Listings</a></li>
             )}
 
             {role === "Landlord" && (
@@ -60,7 +62,7 @@ function Home() {
         <div className="navbar-dropdown">
           <button className="dropdown-btn">Account ▾</button>
           <div className="dropdown-content">
-            <a href="/profile">Profile</a>
+            <a href={`/profile/${user}`}>Profile</a>
             <a href="/settings">Settings</a>
             <button
               onClick={handleLogout}

@@ -1,43 +1,56 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { MdMessage } from "react-icons/md";
 
-const BACKEND_URL = "http://88.200.63.148:3009"; // adjust your backend URL
+import "./Profile.css";
 
-export default function Profile({ profileUserId: propProfileUserId }) {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-  const storedUserId = localStorage.getItem("user_id");
+const API_URL = process.env.REACT_APP_API_URL;
 
-  // use passed profileUserId or fallback to logged-in user ID
-  const profileUserId = propProfileUserId || currentUser.user_id || storedUserId;
+const handleLogout = async () => {
+  try {
+    const res = await fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
 
-  const [profileUser, setProfileUser] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+    if (res.ok) {
+      window.location.href = '/';
+    } else {
+      console.error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+};
+
+function Profile() {
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const loggedInUserId = localStorage.getItem("user_id");
+  const role = localStorage.getItem("role")
+
 
   useEffect(() => {
-    if (!profileUserId) {
-      setError("No user ID available");
-      setLoading(false);
-      return;
-    }
-
-    fetch(`${BACKEND_URL}/api/users/${profileUserId}`)
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`Error ${res.status}: ${text}`);
-        }
-        return res.json();
+    fetch(`${API_URL}/profile/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched user:", data);
+        setUser(data);
       })
-      .then((data) => setProfileUser(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [profileUserId]);
+      .catch(err => console.error(err));
+  }, [userId]);
 
-  if (loading) return <p>Loading profile...</p>;
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
+  if (!user) return <p>Loading...</p>;
+
+  const isOwnProfile = String(loggedInUserId) === String(user.id);
+  const profilePic = user.profile_picture
+    ? `${API_URL}${user.profile_picture}`
+    : `${API_URL}/uploads/default-profile.jpg`;
+  console.log("Profile pic: ", profilePic);
 
   return (
-    <div className="container">
+    <div>
       <nav className="navbar">
         <div className="navbar-logo">FlatFinder</div>
 
@@ -46,42 +59,96 @@ export default function Profile({ profileUserId: propProfileUserId }) {
             <li><a href="/home">Home</a></li>
             <li><a href="/apartments">Apartments</a></li>
             <li><a href="/student-listings">Student Listings</a></li>
-            <li><a href="/messages">Messages</a></li>
+
+            {role === "Student" && (
+              <li><a href="/my-listings">My Listings</a></li>
+            )}
+
+            {role === "Landlord" && (
+              <>
+                <li><a href="/my-apartments">My Apartments</a></li>
+              </>
+            )}
+
+            <li><a href="/messages">
+              <MdMessage style={{ marginRight: "5px", verticalAlign: "middle" }} />
+              Messages
+            </a></li>
           </ul>
+        </div>
+
+        <div className="navbar-search">
+          <input type="text" placeholder="Search..." className="navbar-search" />
         </div>
 
         <div className="navbar-dropdown">
           <button className="dropdown-btn">Account ▾</button>
           <div className="dropdown-content">
-            <a href="/profile">Profile</a>
+            <a href={`/profile/${loggedInUserId}`}>Profile</a>
             <a href="/settings">Settings</a>
-            {/* Add logout if you want here */}
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '10px',
+                margin: 0,
+                color: '#004aad',
+                cursor: 'pointer',
+                font: 'inherit',
+                textDecoration: 'underline'
+              }}
+            >
+              Logout
+            </button>
+
           </div>
         </div>
       </nav>
+      <div className="profile-page-container">
+        <div className="profile-page-grid">
+          <div className="profile-card" style={{ textAlign: "center" }}>
+            <div className="profile-image-wrapper" style={{ margin: "0 auto", width: "150px", height: "150px" }}>
+              <img
+                src={profilePic}
+                alt="Profile"
+                className="profile-image"
+              />
+            </div>
+            <h1 className="profile-name" style={{ marginTop: "1rem" }}>{user.name}</h1>
+            <p><strong>Bio:</strong> {user.bio || "No bio yet"}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Role:</strong> {user.role}</p>
+            <p><strong>Phone number:</strong> {user.phone_number}</p>
 
-      <div className="profile-container" style={{ maxWidth: 600, margin: "20px auto" }}>
-        <h2>User Profile</h2>
+            {user.role === "Student" && (
+              <>
+                <p><strong>Student Number:</strong> {user.student_number || "N/A"}</p>
+                <p><strong>Major:</strong> {user.major || "N/A"}</p>
+              </>
+            )}
 
-        {profileUser ? (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {Object.entries(profileUser).map(([key, value]) => (
-                <tr key={key} style={{ borderBottom: "1px solid #ddd" }}>
-                  <td style={{ padding: "8px", fontWeight: "bold", textTransform: "capitalize" }}>
-                    {key.replace(/_/g, " ")}
-                  </td>
-                  <td style={{ padding: "8px" }}>
-                    {typeof value === "boolean" ? (value ? "Yes" : "No") : String(value)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No profile data found.</p>
-        )}
+            {user.role === "Landlord" && (
+              <>
+                <p><strong>Company Name:</strong> {user.company_name || "N/A"}</p>
+                <p><strong>Verified:</strong> {user.verified ? "Yes ✅" : "No ❌"}</p>
+              </>
+            )}
+
+            {isOwnProfile && (
+              <button
+                className="profile-edit-button"
+                onClick={() => navigate(`/profile/${userId}/edit`)}
+              >
+                Edit Profile
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+
   );
 }
+
+export default Profile;

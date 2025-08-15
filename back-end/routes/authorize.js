@@ -20,8 +20,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/register', 
-  
+router.post('/register',
+
   [
     body('email').isEmail().withMessage('Must be a valid email'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
@@ -39,12 +39,20 @@ router.post('/register',
       return res.status(400).json({ errors: errors.array() });
     }
 
+    const profile_picture = '/uploads/default-profile.jpg';
+
     const { email, password, name, phone_number, role } = req.body;
 
     try {
-      const newUser = await dataPool.registerUser(email, password, name, phone_number, role );
+      const newUser = await dataPool.registerUser(email, password, name, phone_number, role, profile_picture);
       console.log('User registered:', newUser);
-      res.status(201).json({ message: 'User registered successfully', user: newUser });
+      req.session.user = {
+        user_id: newUser.user_id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      };
+      res.json({ message: "User registered successfully", user: req.session.user });
     } catch (err) {
       if (err.message === 'Email already exists') {
         res.status(409).json({ error: err.message });

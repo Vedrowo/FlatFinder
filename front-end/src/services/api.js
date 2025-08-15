@@ -97,3 +97,21 @@ export async function getApartmentById(apartmentId) {
   const data = await response.json();
   return data;
 }
+
+export async function getLandlordName(user_id) {
+  const response = await fetch(`${API_URL}/apartments/profile/${user_id}`)
+   if (!response.ok) {
+    throw new Error("Failed to fetch landlord");
+  }
+  const data = await response.json();
+  return data;
+}
+
+export async function getUser(user_id) {
+  const response = await fetch(`${API_URL}/profile/${user_id}`)
+  if (!response.ok) {
+    throw new Error("Failed to fetch user")
+  }
+  const data = await response.json()
+  return data
+}

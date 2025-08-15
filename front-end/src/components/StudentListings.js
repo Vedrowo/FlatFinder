@@ -9,6 +9,7 @@ function StudentListings() {
     const navigate = useNavigate();
 
     const role = localStorage.getItem("role");
+    const user_id = localStorage.getItem("user_id")
 
     const handleLogout = () => {
         localStorage.clear();
@@ -31,7 +32,7 @@ function StudentListings() {
                         <li><a href="/student-listings">Student Listings</a></li>
 
                         {role === "Student" && (
-                            <li><a href="/my-student-listings">My Requests</a></li>
+                            <li><a href="/my-listings">My Listings</a></li>
                         )}
 
                         {role === "Landlord" && (
@@ -54,7 +55,7 @@ function StudentListings() {
                 <div className="navbar-dropdown">
                     <button className="dropdown-btn">Account ▾</button>
                     <div className="dropdown-content">
-                        <a href="/profile">Profile</a>
+                        <a href={`/profile/${user_id}`}>Profile</a>
                         <a href="/settings">Settings</a>
                         <button
                             onClick={handleLogout}

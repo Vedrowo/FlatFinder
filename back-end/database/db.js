@@ -7,18 +7,18 @@ const { comparePasswords } = require('../utils/password');
 const { resolve } = require('path');
 
 const conn = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_DATABASE,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 let dataPool = {}
 
-dataPool.registerUser = async (email, password, name, phone_number, role) => {
+dataPool.registerUser = async (email, password, name, phone_number, role, profile_picture) => {
     const emailExists = await dataPool.checkEmailExists(email)
 
     if (emailExists) {
@@ -28,7 +28,7 @@ dataPool.registerUser = async (email, password, name, phone_number, role) => {
     const encryptedPassword = await hashPassword(password)
 
     return new Promise((resolve, reject) => {
-        conn.query(`INSERT INTO User (email , password, name, phone_number) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phone_number], (err, res) => {
+        conn.query(`INSERT INTO User (email , password, name, phone_number, profile_picture) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phone_number, profile_picture], (err, res) => {
             if (err) { return reject(err) }
 
             const userID = res.insertId
@@ -37,12 +37,10 @@ dataPool.registerUser = async (email, password, name, phone_number, role) => {
                 conn.query('INSERT INTO Student (user_id) VALUES (?)', [userID], (err, res) => {
                     if (err) { return reject(err) }
                     return resolve({
-                        user: {
-                            user_id: userID,
-                            role,
-                            name,
-                            email
-                        }
+                        user_id: userID,
+                        role,
+                        name,
+                        email
                     })
                 })
             }
@@ -50,12 +48,10 @@ dataPool.registerUser = async (email, password, name, phone_number, role) => {
                 conn.query('INSERT INTO Landlord (user_id) VALUES (?)', [userID], (err, res) => {
                     if (err) { return reject(err) }
                     return resolve({
-                        user: {
-                            user_id: userID,
-                            role,
-                            name,
-                            email
-                        }
+                        user_id: userID,
+                        role,
+                        name,
+                        email
                     })
                 })
             }
@@ -95,7 +91,7 @@ dataPool.loginUser = async (email, password) => {
                     if (studentRes.length > 0) {
                         user.role = "Student";
                     } else {
-                        user.role = null; 
+                        user.role = null;
                     }
                     return resolve(user);
                 })
@@ -104,29 +100,64 @@ dataPool.loginUser = async (email, password) => {
     })
 }
 
-dataPool.addStudentData = (user_id, major, student_number) => {
+dataPool.getUser = (user_id) => {
     return new Promise((resolve, reject) => {
-        conn.query('UPDATE Student SET major = ?, student_number = ? WHERE user_id = ?', [major, student_number, user_id], (err, res) => {
+        conn.query('SELECT * FROM User WHERE user_id = ?', [user_id], (err, res) => {
             if (err) { return reject(err) }
-            if (res.affectedRows === 0) {
-                return reject(new Error('Student not found'))
-            }
-            return resolve(res)
+
+            const user = res[0]
+
+            conn.query('SELECT * FROM Landlord WHERE user_id = ?', [user.user_id], (err, landlordRes) => {
+                if (err) return reject(err);
+
+                if (landlordRes.length > 0) {
+                    user.role = "Landlord";
+                    return resolve(user);
+                }
+
+                conn.query('SELECT * FROM Student WHERE user_id = ?', [user.user_id], (err, studentRes) => {
+                    if (err) return reject(err);
+
+                    if (studentRes.length > 0) {
+                        user.role = "Student";
+                    } else {
+                        user.role = null;
+                    }
+                    resolve(user);
+                })
+            })
         })
     })
 }
 
-dataPool.addLandlordData = (user_id, verified_status, agency_name) => {
+dataPool.updateUserProfile = (user_id, data) => {
     return new Promise((resolve, reject) => {
-        conn.query('UPDATE Landlord SET verified_status = ?, agency_name = ? WHERE user_id = ?', [verified_status, agency_name, user_id], (err, res) => {
-            if (err) { return reject(err) }
-            if (res.affectedRows === 0) {
-                return reject(new Error('Landlord not found'))
-            }
-            return resolve(res)
-        })
-    })
-}
+        let query = "UPDATE User SET bio=? ";
+        const params = [data.bio];
+
+        if (data.profilePic) {
+            query += ", profile_picture=?";
+            params.push(data.profilePic);
+        }
+
+        if (data.role === "Student") {
+            query += ", student_number=?, major=?";
+            params.push(data.student_number, data.major);
+        } else if (data.role === "Landlord") {
+            query += ", company_name=?, verified=?";
+            params.push(data.company_name, data.verified);
+        }
+
+        query += " WHERE user_id=?";
+        params.push(user_id);
+
+        conn.query(query, params, (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+        });
+    });
+};
+
 
 dataPool.deleteUser = (user_id) => {
     return new Promise((resolve, reject) => {
@@ -231,39 +262,48 @@ dataPool.getApartments = (startPrice, endPrice, location) => {
     })
 }
 
+dataPool.getApartmentOwner = (user_id) => {
+    return new Promise((resolve, reject) => {
+        conn.query('SELECT name FROM User WHERE (user_id) = ?', [user_id], (err, res) => {
+            if (err) { return reject(err) }
+            return resolve(res[0].name)
+        })
+    })
+}
+
 dataPool.getApartment = (apartment_id) => {
-  return new Promise((resolve, reject) => {
-    const query = `
+    return new Promise((resolve, reject) => {
+        const query = `
       SELECT a.*, u.user_id AS landlord_id, u.name AS landlord_name
       FROM Apartment a
       JOIN User u ON a.user_id = u.user_id
       WHERE a.apartment_id = ?
     `;
 
-    conn.query(query, [apartment_id], (err, res) => {
-      if (err) return reject(err);
-      if (res.length === 0) return resolve(null);
+        conn.query(query, [apartment_id], (err, res) => {
+            if (err) return reject(err);
+            if (res.length === 0) return resolve(null);
 
-      const row = res[0];
-      const apartment = {
-        apartment_id: row.apartment_id,
-        user_id: row.user_id,
-        title: row.title,
-        description: row.description,
-        price: row.price,
-        location: row.location,
-        available_from: row.available_from,
-        available_to: row.available_to,
-        images: row.images ? JSON.parse(row.images) : [],
-        landlord: {
-          user_id: row.landlord_id,
-          username: row.landlord_name,
-        }
-      };
+            const row = res[0];
+            const apartment = {
+                apartment_id: row.apartment_id,
+                user_id: row.user_id,
+                title: row.title,
+                description: row.description,
+                price: row.price,
+                location: row.location,
+                available_from: row.available_from,
+                available_to: row.available_to,
+                images: row.images ? JSON.parse(row.images) : [],
+                landlord: {
+                    user_id: row.landlord_id,
+                    username: row.landlord_name,
+                }
+            };
 
-      resolve(apartment);
+            resolve(apartment);
+        });
     });
-  });
 };
 
 

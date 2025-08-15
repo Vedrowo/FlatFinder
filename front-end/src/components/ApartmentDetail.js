@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getApartmentById } from "../services/api";
+import { getLandlordName } from "../services/api";
 import "./ApartmentDetail.css";
 import { MdMessage } from "react-icons/md";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const handleLogout = async () => {
   try {
@@ -34,7 +37,6 @@ function parseImages(images) {
 
 function ApartmentDetail() {
   const role = localStorage.getItem("role");
-  const name = localStorage.getItem("name");
   const user_id = localStorage.getItem("user_id")
   const { apartmentId } = useParams();
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ function ApartmentDetail() {
   const [apartment, setApartment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [landlordName, setLandlordName] = useState("");
 
   useEffect(() => {
     getApartmentById(apartmentId)
@@ -55,17 +58,25 @@ function ApartmentDetail() {
       });
   }, [apartmentId]);
 
+  useEffect(() => {
+  if (apartment?.user_id) {
+    getLandlordName(apartment.user_id)
+      .then(name => setLandlordName(name))
+      .catch(err => console.error(err));
+  }
+}, [apartment?.user_id]);
+
   if (loading) return <p>Loading apartment details...</p>;
   if (!apartment) return <p>Apartment not found.</p>;
 
   const images = parseImages(apartment.images);
-  const backendURL = "http://88.200.63.148:3009";
   const mainImage = images.length > 0
-    ? `${backendURL}${images[currentImageIndex]}`
+    ? `${API_URL}${images[currentImageIndex]}`
     : "/placeholder.jpg";
 
   const handleLandlordClick = () => {
-    navigate(`/profile/${apartment.landlord_user_id}`);
+    console.log("Apartment user_id:", apartment.user_id);
+    navigate(`/profile/${apartment.user_id}`);
   };
 
   return (
@@ -103,7 +114,7 @@ function ApartmentDetail() {
         <div className="navbar-dropdown">
           <button className="dropdown-btn">Account ▾</button>
           <div className="dropdown-content">
-            <a href="/profile">Profile</a>
+            <a href={`/profile/${user_id}`}>Profile</a>
             <a href="/settings">Settings</a>
             <button
               onClick={handleLogout}
@@ -170,7 +181,7 @@ function ApartmentDetail() {
             onClick={handleLandlordClick}
             style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
           >
-            {name || "Unknown"}
+            {landlordName || "Loading..."}
           </span>
         </p>
         <p>{apartment.description}</p>
