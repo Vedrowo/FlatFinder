@@ -130,8 +130,8 @@ function Profile() {
 
             {user.role === "Landlord" && (
               <>
-                <p><strong>Company Name:</strong> {user.company_name || "N/A"}</p>
-                <p><strong>Verified:</strong> {user.verified ? "Yes ✅" : "No ❌"}</p>
+                <p><strong>Agency Name:</strong> {user.agency_name || "N/A"}</p>
+                <p><strong>Verified:</strong> {user.verified_status ? "Yes ✅" : "No ❌"}</p>
               </>
             )}
 

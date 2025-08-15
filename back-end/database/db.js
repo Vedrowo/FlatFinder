@@ -18,7 +18,7 @@ const conn = mysql.createPool({
 
 let dataPool = {}
 
-dataPool.registerUser = async (email, password, name, phone_number, role, profile_picture) => {
+dataPool.registerUser = async (email, password, name, phone_number, role) => {
     const emailExists = await dataPool.checkEmailExists(email)
 
     if (emailExists) {
@@ -27,8 +27,10 @@ dataPool.registerUser = async (email, password, name, phone_number, role, profil
 
     const encryptedPassword = await hashPassword(password)
 
+    const profile_picture = '/uploads/default-profile.jpg';
+
     return new Promise((resolve, reject) => {
-        conn.query(`INSERT INTO User (email , password, name, phone_number, profile_picture) VALUES (?,?,?,?)`, [email, encryptedPassword, name, phone_number, profile_picture], (err, res) => {
+        conn.query(`INSERT INTO User (email , password, name, phone_number, profile_picture) VALUES (?,?,?,?,?)`, [email, encryptedPassword, name, phone_number, profile_picture], (err, res) => {
             if (err) { return reject(err) }
 
             const userID = res.insertId
@@ -103,15 +105,21 @@ dataPool.loginUser = async (email, password) => {
 dataPool.getUser = (user_id) => {
     return new Promise((resolve, reject) => {
         conn.query('SELECT * FROM User WHERE user_id = ?', [user_id], (err, res) => {
-            if (err) { return reject(err) }
+            if (err) return reject(err);
 
-            const user = res[0]
+            if (!res || res.length === 0) {
+                return resolve(null);
+            }
+
+            const user = res[0];
 
             conn.query('SELECT * FROM Landlord WHERE user_id = ?', [user.user_id], (err, landlordRes) => {
                 if (err) return reject(err);
 
                 if (landlordRes.length > 0) {
                     user.role = "Landlord";
+                    user.agency_name = landlordRes[0].agency_name;
+                    user.verified_status = landlordRes[0].verified_status;
                     return resolve(user);
                 }
 
@@ -120,44 +128,65 @@ dataPool.getUser = (user_id) => {
 
                     if (studentRes.length > 0) {
                         user.role = "Student";
+                        user.major = studentRes[0].major;
+                        user.student_number = studentRes[0].student_number;
                     } else {
-                        user.role = null;
+                        user.role = "Unknown";
                     }
                     resolve(user);
-                })
-            })
-        })
-    })
-}
-
-dataPool.updateUserProfile = (user_id, data) => {
-    return new Promise((resolve, reject) => {
-        let query = "UPDATE User SET bio=? ";
-        const params = [data.bio];
-
-        if (data.profilePic) {
-            query += ", profile_picture=?";
-            params.push(data.profilePic);
-        }
-
-        if (data.role === "Student") {
-            query += ", student_number=?, major=?";
-            params.push(data.student_number, data.major);
-        } else if (data.role === "Landlord") {
-            query += ", company_name=?, verified=?";
-            params.push(data.company_name, data.verified);
-        }
-
-        query += " WHERE user_id=?";
-        params.push(user_id);
-
-        conn.query(query, params, (err, result) => {
-            if (err) return reject(err);
-            resolve(result);
+                });
+            });
         });
     });
 };
 
+
+dataPool.updateUserProfile = (user_id, data) => {
+    return new Promise((resolve, reject) => {
+        let userQuery = "UPDATE User SET bio=?";
+        const userParams = [data.bio];
+
+        if (data.profile_picture) {
+            userQuery += ", profile_picture=?";
+            userParams.push(data.profile_picture);
+        }
+
+        userQuery += " WHERE user_id=?";
+        userParams.push(user_id);
+
+        conn.query(userQuery, userParams, (err) => {
+            if (err) return reject(err);
+
+            if (data.role === "Student") {
+                const studentQuery = `
+                    UPDATE Student 
+                    SET student_number=?, major=? 
+                    WHERE user_id=?`;
+                const studentParams = [data.student_number, data.major, user_id];
+
+                conn.query(studentQuery, studentParams, (err) => {
+                    if (err) return reject(err);
+                    resolve({ message: "Student profile updated" });
+                });
+
+            } else if (data.role === "Landlord") {
+                const landlordQuery = `
+                    UPDATE Landlord 
+                    SET agency_name=?, verified_status=? 
+                    WHERE user_id=?`;
+                const landlordParams = [data.agency_name, data.verified_status, user_id];
+
+                conn.query(landlordQuery, landlordParams, (err) => {
+                    if (err) return reject(err);
+                    resolve({ message: "Landlord profile updated" });
+                });
+
+            } else {
+                resolve({ message: "User profile updated" });
+            }
+        });
+    });
+};
 
 dataPool.deleteUser = (user_id) => {
     return new Promise((resolve, reject) => {
@@ -390,7 +419,7 @@ dataPool.sendMessage = (sender_id, receiver_id, content) => {
 
 dataPool.getChat = (sender_id, receiver_id) => {
     return new Promise((resolve, reject) => {
-        conn.query('SELECT content FROM Message WHERE (sender_id = ? AND receiver_id = ?) OR (receiver_id = ? AND sender_id = ?) ORDER BY timestamp ASC',
+        conn.query('SELECT * FROM Message WHERE (sender_id = ? AND receiver_id = ?) OR (receiver_id = ? AND sender_id = ?) ORDER BY timestamp ASC',
             [sender_id, receiver_id, sender_id, receiver_id], (err, res) => {
                 if (err) { return reject(err) }
                 return resolve(res)
@@ -398,6 +427,38 @@ dataPool.getChat = (sender_id, receiver_id) => {
         )
     })
 }
+
+dataPool.getRecentChats = (user_id) => {
+    return new Promise((resolve, reject) => {
+        conn.query(
+            `SELECT 
+                u.user_id AS partner_id,
+                u.name AS partner_name,
+                u.profile_picture AS partner_picture,
+                m1.content AS last_message,
+                m1.timestamp AS last_time
+            FROM Message m1
+            INNER JOIN (
+                SELECT 
+                    IF(sender_id = ?, receiver_id, sender_id) AS chat_partner,
+                    MAX(timestamp) AS last_time
+                FROM Message
+                WHERE sender_id = ? OR receiver_id = ?
+                GROUP BY chat_partner
+            ) m2 ON ((m1.sender_id = ? AND m1.receiver_id = m2.chat_partner) 
+                     OR (m1.sender_id = m2.chat_partner AND m1.receiver_id = ?))
+                 AND m1.timestamp = m2.last_time
+            INNER JOIN User u ON u.user_id = m2.chat_partner
+            ORDER BY m1.timestamp DESC`,
+            [user_id, user_id, user_id, user_id, user_id],
+            (err, res) => {
+                if (err) return reject(err);
+                resolve(res);
+            }
+        );
+    });
+};
+
 
 dataPool.giveRating = (reviewer_id, reviewed_id, rating, comment) => {
     return new Promise((resolve, reject) => {

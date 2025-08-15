@@ -39,12 +39,10 @@ router.post('/register',
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const profile_picture = '/uploads/default-profile.jpg';
-
     const { email, password, name, phone_number, role } = req.body;
 
     try {
-      const newUser = await dataPool.registerUser(email, password, name, phone_number, role, profile_picture);
+      const newUser = await dataPool.registerUser(email, password, name, phone_number, role);
       console.log('User registered:', newUser);
       req.session.user = {
         user_id: newUser.user_id,

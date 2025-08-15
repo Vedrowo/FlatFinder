@@ -11,6 +11,7 @@ import MyListings from "./components/MyListings";
 import Profile from "./components/Profile";
 import EditProfile from "./components/EditProfile"
 import ApartmentDetail from './components/ApartmentDetail';
+import Messages from './components/Messages';
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
         <Route path="/profile/:userId/edit" element={<EditProfile />} />
         <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/apartment/:apartmentId" element={<ApartmentDetail />} />
-
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/messages/:partnerId" element={<Messages />} />
       </Routes>
     </Router>
   );

@@ -54,6 +54,9 @@ app.use('/application-request', ApplicationRequest)
 const Profile = require('./routes/profile');
 app.use('/profile', Profile)
 
+const Messages = require('./routes/messages');
+app.use('/messages', Messages)
+
 const dataPool = require('./database/db.js')
 
 const authorize = require('./routes/authorize');

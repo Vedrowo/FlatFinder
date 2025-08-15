@@ -36,8 +36,8 @@ export default function EditProfile() {
       formData.append("student_number", user.student_number || "");
       formData.append("major", user.major || "");
     } else if (user.role === "Landlord") {
-      formData.append("company_name", user.company_name || "");
-      formData.append("verified", user.verified ? 1 : 0);
+      formData.append("agency_name", user.agency_name || "");
+      formData.append("verified_status", user.verified_status ? 1 : 0);
     }
 
     if (selectedFile) {
@@ -111,11 +111,11 @@ export default function EditProfile() {
             {user.role === "Landlord" && (
               <>
                 <div className="profile-form-group">
-                  <label>Company Name:</label>
+                  <label>Agency Name:</label>
                   <input
                     type="text"
-                    name="company_name"
-                    value={user.company_name || ""}
+                    name="agency_name"
+                    value={user.agency_name || ""}
                     onChange={handleChange}
                     className="profile-input"
                   />
@@ -124,10 +124,10 @@ export default function EditProfile() {
                   <label>
                     <input
                       type="checkbox"
-                      name="verified"
-                      checked={!!user.verified}
+                      name="verified_status"
+                      checked={!!user.verified_status}
                       onChange={(e) =>
-                        setUser({ ...user, verified: e.target.checked })
+                        setUser({ ...user, verified_status: e.target.checked })
                       }
                     />
                     Verified

@@ -41,8 +41,8 @@ Profile.get('/:userId', async (req, res) => {
       phone_number: user.phone_number,
       student_number: user.student_number || null,
       major: user.major || null,
-      company_name: user.company_name || null,
-      verified: user.verified || false
+      agency_name: user.agency_name || null,
+      verified_status: user.verified_status || false
     };
 
 
@@ -56,14 +56,17 @@ Profile.get('/:userId', async (req, res) => {
 Profile.post('/:userId/edit', upload.single('profile_picture'), async (req, res) => {
   try {
     const user_id = req.params.userId;
-    const { bio, role, student_number, major, company_name, verified } = req.body;
+    const { bio, role, student_number, major, agency_name, verified_status } = req.body;
 
-    let profilePicPath = null;
-    if (req.file) {
-      profilePicPath = `/uploads/profile-pics/${req.file.filename}`;
+    const updateData = { bio, role };
+
+    if (role === "Student") {
+      updateData.student_number = student_number;
+      updateData.major = major;
+    } else if (role === "Landlord") {
+      updateData.agency_name = agency_name; 
+      updateData.verified_status = verified_status; 
     }
-
-    const updateData = { bio, role, student_number, major, company_name, verified };
 
     if (req.file) {
       updateData.profile_picture = `/uploads/profile-pics/${req.file.filename}`;
